@@ -1,0 +1,20 @@
+Exhale
+A Command line to convert Excel files into various other formats.
+
+Simple tool that pipes xml files into any supported format.
+
+
+Exhale myfile.xslx -to csv > myfile.xml
+Exhale myfile.xslx -to xml > myfile.xml
+
+
+Switches:
+
+-to   The format to export to.  Can be any supported format.
+
+-sheet <sheet name or index> Defaults to the first sheet in the workbook
+
+-all   Exports all the sheets, sheets are delimited according to the output.
+
+-formats	Overrides everything else and simply outputs the supported formats.
+
