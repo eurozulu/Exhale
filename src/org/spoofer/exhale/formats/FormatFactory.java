@@ -1,80 +1,70 @@
 package org.spoofer.exhale.formats;
 
-import static org.spoofer.exhale.utils.Strings.isEmpty;
+import java.io.IOException;
+import java.util.Properties;
 
-import org.spoofer.exhale.utils.Strings;
+public class FormatFactory {
 
-public class FormatFactory
-{
+	private static final String FORMAT_PROPERTIES = "formats.properties";
 
-	public static final String DEFAULT_FORMAT_PACKAGE = Csv.class.getPackage().getName();
-	
-	private static final String PACKAGE_NAME_DELIMITER = ";";
-
-
-	
-	
 	@SuppressWarnings("unchecked")
-	public static ExhaleFormat loadFormat(String format) throws FormatException
-	{
-		String[] packages = getFormatPackages();
-		
-		String formatClassName = Strings.capitalise(format);
-		Class<ExhaleFormat> formatClass = null;
-		
-		for (String packName : packages)
-		{
-			StringBuilder cls = new StringBuilder(packName);
-			if (!packName.endsWith("."))
-				cls.append(".");
-			cls.append(formatClassName);
-			
-			try {
-				formatClass = (Class<ExhaleFormat>) Class.forName(cls.toString());
-			
-			} catch (ClassNotFoundException e) {
-				formatClass = null;
-			}
-		
-			if (null != formatClass)
-				break;
-		}
+	public static ExhaleFormat loadFormat(String format) throws FormatException {
 
-		if (null == formatClass)
+		Properties formats = getProperties();
+
+		if (!formats.containsKey(format.toLowerCase()))
+			throw new FormatException("Unknown format '" + format + " '");
+
+		String formatClassName = formats.getProperty(format);
+		Class<ExhaleFormat> formatClass = null;
+
+		try {
+			formatClass = (Class<ExhaleFormat>) Class.forName(formatClassName);
+
+		} catch (ClassNotFoundException e) {
 			throw new FormatException("Failed to find a class for format " + formatClassName);
+		}
 		
 		if (!ExhaleFormat.class.isAssignableFrom(formatClass))
-			throw new FormatException(formatClass.getName() + " does not support the " + ExhaleFormat.class.getName() + " interface");
-	
+			throw new FormatException(formatClass.getName()
+					+ " does not support the " + ExhaleFormat.class.getName()
+					+ " interface");
+
 		ExhaleFormat newFormat;
 		try {
 			newFormat = formatClass.newInstance();
-			
+
 		} catch (Exception e) {
-			throw new FormatException("failed to load format " + formatClass.getName(), e);
+			throw new FormatException("failed to load format "
+					+ formatClass.getName(), e);
 		}
-		
+
 		return newFormat;
 	}
 
-	public static String[] getFormats()
-	{
-		Class<ExhaleFormat>[] classes = (Class<ExhaleFormat>[]) ExhaleFormat.class.getClasses();
-		String[] names = new String[classes.length];
-		
+	public static String[] getFormats() {
+
+		Properties props = getProperties();
+
+		String[] names = new String[props.size()];
 		int index = 0;
-		for (Class<ExhaleFormat> cls : classes)
-			names[index++] = cls.getSimpleName().toLowerCase();
-		
+		for (String name : props.stringPropertyNames())
+			names[index++] = name; 
+
 		return names;
 	}
-	public static String[] getFormatPackages()
-	{
-		String packageName = System.getProperty(DEFAULT_FORMAT_PACKAGE);
-		if (isEmpty(packageName))
-			packageName = DEFAULT_FORMAT_PACKAGE;
+
+	protected static Properties getProperties() {
+		Properties props = new Properties();
+		try {
+			props.load(FormatFactory.class.getResourceAsStream(FORMAT_PROPERTIES));
 		
-		return packageName.contains(PACKAGE_NAME_DELIMITER) ? packageName.split(PACKAGE_NAME_DELIMITER) : new String[]{packageName.trim()};
-	
+		} catch (IOException e) {
+			throw new IllegalStateException("Failed to open formats property file: " + FORMAT_PROPERTIES);
+		}
+
+		return props;
 	}
+
+
 }
