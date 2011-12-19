@@ -23,6 +23,34 @@ public interface ExhaleFormat
 	public void closeSheet(XSSFSheet sheet) throws IOException;
 	public void closeBook(XSSFWorkbook workbook) throws IOException;
 	
+	/**
+	 * Sets the command line arguments.
+	 * All arguments are passed to the Formatter.
+	 * @param args
+	 */
 	public void setArguments(NamedArgs args);
+	
+	/**
+	 * Sets the output stream to receive the export.
+	 * @param out
+	 */
 	public void setOutput(OutputStream out);
+	public OutputStream getOutput();
+	
+	/**
+	 * Sets the number of rows to include as Header fields.
+	 * By default, this is one, indicating the first row in each sheet contains header fields.
+	 * Setting this to a number greater than 1 will include each consecutive row below the first, upto the count of rows set.
+	 * e.g. setting this to 3 will include the first three rows as headers. When more than one of those rows contains a value,
+	 * The last row, the one with the highest index, is used.
+	 *  
+	 * @param rowIndex
+	 */
+	public void setHeaderRow(int rowIndex);
+	
+	/**
+	 * Gets the number of rows to use as header fields.
+	 * @return
+	 */
+	public int getHeaderRows();
 }

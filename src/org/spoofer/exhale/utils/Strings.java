@@ -24,4 +24,25 @@ public class Strings
 		return sb.toString();
 	}
 	
+	public static boolean isNumber(String s)
+	{
+		try {
+			Integer.parseInt(s);
+			return true;
+		} catch (NumberFormatException e) {}
+		try {
+			Long.parseLong(s);
+			return true;
+		} catch (NumberFormatException e) {}
+		try {
+			Float.parseFloat(s);
+			return true;
+		} catch (NumberFormatException e) {}
+		try {
+			Double.parseDouble(s);
+			return true;
+		} catch (NumberFormatException e) {}
+		
+		return false;
+	}
 }

@@ -1,20 +1,78 @@
 Exhale
-A Command line to convert Excel files into various other formats.
+A Command line to convert Excel files (2007 >) into various other formats.
+No install of Excel is required, using Apache POI libraries. (http://poi.apache.org/)
 
-Simple tool that pipes xml files into any supported format.
+Simple tool that pipes the Microsoft Office Excel 2007 files into any supported format.
+Supported formats at the moment are:
+csv	Comma delimited
+xml XML mark up
 
 
-Exhale myfile.xslx -to csv > myfile.xml
+
+Exhale myfile.xslx -to csv > myfile.csv
 Exhale myfile.xslx -to xml > myfile.xml
 
+A file name should be the first, and only unnamed argument.
+This is the source, Excel (xslx) file you wish to convert.
 
-Switches:
+Output is always to the standard output pipe.
+
+Exhale can also accept a stream from the standard input stream, so data can be piped into and out of it.
+e.g.
+exhale -to xml -indent < myfile.xslx > myfile.xml 
+
+
+Argument:
+Named arguments can be used to control the export.
+Each named argument is preeded with a dash '-', followed by its name.
+If the argument accepts a value, the value follows a space after the name.
 
 -to   The format to export to.  Can be any supported format.
+	  Currently just two supported:
+	  csv
+	  xml
+	  If not stated, then defaults to csv.
+	  
 
--sheet <sheet name or index> Defaults to the first sheet in the workbook
+-sheet <sheet name or index> Specifies which sheet(s) to export.
+							 By default, all sheets are exported.
+							 By naming one or more sheets, only those sheets are exported and others ignored.
+							 Sheets can be named by their name (case insensitive) or their (zero based) index.
+							 Multiple sheets can be specified by separating names with a comma.
+							 Names can be a mix of sheet names and indexes.
+							 e.g. Sheet1,2,Sheet4 will export every other sheet, Sheet 1, Sheet 3 and Sheet 4
+							 as the '2' acts as a zero based index, indicating sheet 3.
 
--all   Exports all the sheets, sheets are delimited according to the output.
+-headerrows n	Sets the number of rows in each sheet to define as head rows, where n is the number of rows,
+				from the top most row, to include as headers.
+				By default this is one, indicating the first row only is a header row.
+				
 
--formats	Overrides everything else and simply outputs the supported formats.
+Formats have their own arguments also, which ar only valid, when that format is in use.
 
+Format CSV
+
+delimit
+line
+
+-noheaders	Indicates the export should ignore the header rows and export just data rows.
+			When present, noheaders will skip the head rows, (As defined by the headerrows argument)
+			When not specified, all rows are exported.
+			
+-delimit	Specifies the field delimiter.
+			By default the limiter is a comma (Hence the name CSV, duh).
+			This can be specified as any other string.
+
+-line		Specifies the line delimiter.
+			By default a return character (\n) is used to delimit each row.
+			Specifying the line argument allows any other string to be used.
+			
+
+
+Format XML
+-blanks		Empty cells are exported as cell leaf nodes.
+			Usually, only cells containing data are written to the export and blank cells omitted.
+			By specifying the blanks, the empty cells are included as simple leaf tags.
+
+-indent		Indents the XML and places each element on its own line.
+			By default xml is exported as a single line of text.						

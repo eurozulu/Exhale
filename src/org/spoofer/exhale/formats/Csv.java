@@ -14,17 +14,17 @@ public class Csv extends AbstractFormat implements ExhaleFormat
 	public static final String DEFAULT_DELIMITER = ",";
 	public static final String DEFAULT_LINE_DELIMITER = "\n\r";
 
-	public static final String ARG_EXCLUDE_ROW = "startrow";
+	public static final String ARG_EX_HEADERS = "noheaders";
 	public static final String ARG_DELIMIT = "delimit";
 	public static final String ARG_LINE_DELIMIT = "line";
 
 	private String delimit = DEFAULT_DELIMITER;
 	private String lineDelimit = DEFAULT_LINE_DELIMITER;
 
-	private boolean includeRows = false;
-	private int startRow = 0;
-	private int rowCount = 0;  // Note, will only count as farr as the start row, then stops counting.
+	private boolean includeHeaders = true;
+	
 	private boolean firstCell;
+	private boolean includeRow;
 
 	public void setArguments(NamedArgs args)
 	{
@@ -44,18 +44,11 @@ public class Csv extends AbstractFormat implements ExhaleFormat
 	{
 		output.println();
 		output.println(sheet.getSheetName());
-		
-		includeRows = false;
 	}
 
 	public void openRow(XSSFRow row) throws IOException
 	{
-		if (!includeRows)
-		{
-			includeRows = rowCount >= startRow;
-			rowCount++;
-			
-		}
+		includeRow = includeHeaders || !isHeaderRow(row);
 		firstCell = true;
 	}
 
@@ -66,7 +59,7 @@ public class Csv extends AbstractFormat implements ExhaleFormat
 	 */
 	public void writeCell(XSSFCell cell) throws IOException
 	{
-		if (includeRows)
+		if (includeRow)
 		{
 			if (firstCell)
 				firstCell = false;
@@ -76,19 +69,18 @@ public class Csv extends AbstractFormat implements ExhaleFormat
 			if (null != cell)
 				output.print(getCellValue(cell));
 		}
-
-
 	}
 
 		
 	public void closeRow(XSSFRow row) throws IOException
 	{
-		if (includeRows)
+		if (includeRow)
 			output.print(lineDelimit);
 	}
 
 	public void closeSheet(XSSFSheet sheet) throws IOException
 	{
+		output.print(lineDelimit);
 	}
 
 	public void closeBook(XSSFWorkbook workbook) throws IOException

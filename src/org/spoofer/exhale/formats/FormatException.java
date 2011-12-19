@@ -3,27 +3,28 @@ package org.spoofer.exhale.formats;
 public class FormatException extends Exception
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public FormatException()
 	{
-		// TODO Auto-generated constructor stub
 	}
 
-	public FormatException(String arg0)
+	public FormatException(String message)
 	{
-		super(arg0);
-		// TODO Auto-generated constructor stub
+		super(message);
 	}
 
-	public FormatException(Throwable arg0)
+	public FormatException(Throwable cause)
 	{
-		super(arg0);
-		// TODO Auto-generated constructor stub
+		super(cause);
 	}
 
-	public FormatException(String arg0, Throwable arg1)
+	public FormatException(String message, Throwable cause)
 	{
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
+		super(message, cause);
 	}
 
 }

@@ -12,7 +12,9 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.spoofer.exhale.Exhale;
 import org.spoofer.exhale.utils.NamedArgs;
+import org.spoofer.exhale.utils.Strings;
 
+import com.sun.xml.internal.txw2.output.IndentingXMLStreamWriter;
 import com.sun.xml.internal.ws.api.streaming.XMLStreamWriterFactory;
 
 public class Xml extends AbstractFormat implements ExhaleFormat
@@ -31,12 +33,15 @@ public class Xml extends AbstractFormat implements ExhaleFormat
 	public static final String ATTR_COL_INDEX = "colIndex";
 	public static final String ATTR_TYPE = "type";
 
-	public static final String ARG_EXCLUDE_BLANKS = "noblanks";
+	public static final String ARG_INCLUDE_BLANKS = "blanks";
+	public static final String ARG_INDENT = "indent";
 
+
+	
 	private XMLStreamWriter xmlOutput;
 
-
-	private boolean excludeBlankCells = false;
+	private boolean includeBlankCells = false;
+	private boolean indentOutput = false;
 
 	public void openBook(XSSFWorkbook workbook) throws IOException
 	{
@@ -79,8 +84,10 @@ public class Xml extends AbstractFormat implements ExhaleFormat
 	public void writeCell(XSSFCell cell) throws IOException
 	{
 		try {
-
-			if (null != cell) {
+			String value = getCellValue(cell);
+			
+			if (!Strings.isEmpty(value)) {
+				
 				xmlOutput.writeStartElement(TAG_CELL);
 				xmlOutput.writeAttribute(ATTR_TYPE, getCellType(cell.getCellType()));
 				xmlOutput.writeAttribute(ATTR_COL_INDEX, Integer.toString(cell.getColumnIndex()));
@@ -89,7 +96,7 @@ public class Xml extends AbstractFormat implements ExhaleFormat
 				xmlOutput.writeCharacters(getCellValue(cell));
 			
 				xmlOutput.writeEndElement();
-			} else if (!excludeBlankCells)
+			} else if (includeBlankCells)
 				xmlOutput.writeEmptyElement(TAG_CELL);
 			
 		}catch(XMLStreamException e) {
@@ -139,16 +146,28 @@ public class Xml extends AbstractFormat implements ExhaleFormat
 		super.setOutput(out);
 
 		this.xmlOutput = XMLStreamWriterFactory.create(out);
-
+		
+		if (this.indentOutput)
+		{
+			this.xmlOutput = new IndentingXMLStreamWriter(xmlOutput);
+			//((IndentingXMLStreamWriter)xmlOutput).setIndentStep("\t");
+		}
 	}
-
+	
 
 	@Override
 	public void setArguments(NamedArgs args)
 	{
 		super.setArguments(args);
 
-		this.excludeBlankCells = args.contains(ARG_EXCLUDE_BLANKS);
+		this.includeBlankCells = args.contains(ARG_INCLUDE_BLANKS);
+		
+		if (args.contains(ARG_INDENT))
+		{
+			this.indentOutput = true;
+			if (null != this.xmlOutput)  // If output already set, reset so it picks up indent wrapper.
+				setOutput(output);
+		}
 	}
 
 
