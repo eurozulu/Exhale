@@ -153,7 +153,7 @@ public abstract class AbstractFormat implements ExhaleFormat {
 			}
 		}
 
-		return value;
+		return null != value ? value.trim() : null;
 	}
 
 	protected static String getCellType(int cellType) {
